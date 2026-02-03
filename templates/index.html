@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNA Sequencing Analysis Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-dna"></i>
+                    <h1>DNA Sequencing Analysis Platform</h1>
+                </div>
+                <p class="subtitle">AI-Powered DNA Sequence Analysis & Visualization</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Input Section -->
+            <section class="input-section card">
+                <h2><i class="fas fa-upload"></i> Input DNA Sequence</h2>
+                
+                <div class="tabs">
+                    <button class="tab-button active" onclick="switchTab('text', event)">
+                        <i class="fas fa-keyboard"></i> Text Input
+                    </button>
+                    <button class="tab-button" onclick="switchTab('file', event)">
+                        <i class="fas fa-file-upload"></i> File Upload
+                    </button>
+                </div>
+
+                <!-- Text Input Tab -->
+                <div id="text-tab" class="tab-content active">
+                    <div class="input-group">
+                        <label for="sequence-input">Paste DNA Sequence (FASTA format or raw sequence)</label>
+                        <textarea 
+                            id="sequence-input" 
+                            placeholder="Enter DNA sequence (A, T, G, C)...&#10;Example:&#10;>Sample Sequence&#10;ATGCGATCGATCGATCGTAGCTAGCTAGCTACGATCG"
+                            rows="8"
+                        ></textarea>
+                        <div class="example-links">
+                            <span>Examples:</span>
+                            <button class="link-button" onclick="loadExample('short')">Short sequence</button>
+                            <button class="link-button" onclick="loadExample('medium')">Medium sequence</button>
+                            <button class="link-button" onclick="loadExample('long')">Long sequence</button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="analyzeSequence()">
+                        <i class="fas fa-chart-line"></i> Analyze Sequence
+                    </button>
+                </div>
+
+                <!-- File Upload Tab -->
+                <div id="file-tab" class="tab-content">
+                    <div class="input-group">
+                        <label for="file-input">Upload DNA Sequence File</label>
+                        <div class="file-upload-area" onclick="document.getElementById('file-input').click()">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Click to upload or drag and drop</p>
+                            <span class="file-info">Supported formats: FASTA, FASTQ, TXT (.fa, .fasta, .fq, .fastq, .txt)</span>
+                        </div>
+                        <input 
+                            type="file" 
+                            id="file-input" 
+                            accept=".fasta,.fa,.fastq,.fq,.txt,.seq"
+                            style="display: none;"
+                            onchange="handleFileSelect(event)"
+                        >
+                        <div id="selected-file" class="selected-file" style="display: none;">
+                            <i class="fas fa-file"></i>
+                            <span id="filename"></span>
+                            <button onclick="clearFile()" class="clear-btn">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="uploadAndAnalyze()">
+                        <i class="fas fa-chart-line"></i> Upload & Analyze
+                    </button>
+                </div>
+            </section>
+
+            <!-- Loading Indicator -->
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Analyzing DNA sequence...</p>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results" style="display: none;">
+                <!-- AI Predictions Section -->
+                <section class="card predictions-card">
+                    <h2><i class="fas fa-brain"></i> AI Model Predictions</h2>
+                    <div id="predictions-content"></div>
+                </section>
+
+                <!-- Statistics Section -->
+                <section class="card">
+                    <h2><i class="fas fa-chart-bar"></i> Sequence Statistics</h2>
+                    <div id="statistics-content" class="statistics-grid"></div>
+                </section>
+
+                <!-- Visualizations Section -->
+                <section class="card">
+                    <h2><i class="fas fa-chart-area"></i> Signal Chromatogram</h2>
+                    <div id="chromatogram-content" class="visualization-container"></div>
+                </section>
+
+                <section class="card">
+                    <h2><i class="fas fa-chart-pie"></i> Nucleotide Composition</h2>
+                    <div id="composition-content" class="visualization-container"></div>
+                </section>
+
+                <section class="card">
+                    <h2><i class="fas fa-chart-line"></i> GC Content Distribution</h2>
+                    <div id="gc-distribution-content" class="visualization-container"></div>
+                </section>
+
+                <section class="card">
+                    <h2><i class="fas fa-wave-square"></i> GC Skew Analysis</h2>
+                    <div id="gc-skew-content" class="visualization-container"></div>
+                </section>
+
+                <!-- Detailed Analysis Section -->
+                <section class="card">
+                    <h2><i class="fas fa-microscope"></i> Detailed Analysis</h2>
+                    <div class="analysis-tabs">
+                        <button class="analysis-tab-btn active" onclick="switchAnalysisTab('sequence', event)">
+                            Sequence Details
+                        </button>
+                        <button class="analysis-tab-btn" onclick="switchAnalysisTab('orfs', event)">
+                            Open Reading Frames
+                        </button>
+                        <button class="analysis-tab-btn" onclick="switchAnalysisTab('translation', event)">
+                            Translation
+                        </button>
+                    </div>
+                    
+                    <div id="sequence-details-tab" class="analysis-tab-content active">
+                        <div id="sequence-details"></div>
+                    </div>
+                    
+                    <div id="orfs-tab" class="analysis-tab-content">
+                        <div id="orfs-content"></div>
+                    </div>
+                    
+                    <div id="translation-tab" class="analysis-tab-content">
+                        <div id="translation-content"></div>
+                    </div>
+                </section>
+
+                <!-- Export Section -->
+                <section class="card">
+                    <h2><i class="fas fa-download"></i> Export Results</h2>
+                    <div class="export-buttons">
+                        <button class="btn btn-secondary" onclick="exportResults('json')">
+                            <i class="fas fa-file-code"></i> Export as JSON
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportResults('txt')">
+                            <i class="fas fa-file-alt"></i> Export as TXT
+                        </button>
+                        <button class="btn btn-secondary" onclick="exportResults('csv')">
+                            <i class="fas fa-file-csv"></i> Export as CSV
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Error Display -->
+            <div id="error-message" class="error-message" style="display: none;"></div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 DNA Sequencing Analysis Platform. Powered by AI & Bioinformatics.</p>
+            <p class="footer-note">
+                <i class="fas fa-info-circle"></i> 
+                This platform uses advanced algorithms for DNA sequence analysis and visualization.
+            </p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
