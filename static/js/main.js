@@ -2,6 +2,9 @@
 let currentResults = null;
 let selectedFile = null;
 
+// Constants
+const MAX_DISPLAY_LENGTH = 500;
+
 // Example sequences
 const examples = {
     short: `>Short Example Sequence
@@ -15,7 +18,7 @@ GCTAGCTACGATCGTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTAGCTA
 };
 
 // Tab switching
-function switchTab(tab) {
+function switchTab(tab, event) {
     // Update buttons
     document.querySelectorAll('.tab-button').forEach(btn => {
         btn.classList.remove('active');
@@ -299,15 +302,15 @@ function displayDetailedAnalysis(data) {
     // Sequence details
     const sequenceHtml = `
         <div class="sequence-display">
-            <h4>Original Sequence (first 500 bp):</h4>
-            <div>${formatSequence(data.sequence.substring(0, 500))}</div>
-            ${data.full_length > 500 ? `<p>... (${data.full_length - 500} more bases)</p>` : ''}
+            <h4>Original Sequence (first ${MAX_DISPLAY_LENGTH} bp):</h4>
+            <div>${formatSequence(data.sequence.substring(0, MAX_DISPLAY_LENGTH))}</div>
+            ${data.full_length > MAX_DISPLAY_LENGTH ? `<p>... (${data.full_length - MAX_DISPLAY_LENGTH} more bases)</p>` : ''}
             
             <h4 style="margin-top: 1rem;">Complement:</h4>
-            <div>${formatSequence(analysis.complement.substring(0, 500))}</div>
+            <div>${formatSequence(analysis.complement.substring(0, MAX_DISPLAY_LENGTH))}</div>
             
             <h4 style="margin-top: 1rem;">Reverse Complement:</h4>
-            <div>${formatSequence(analysis.reverse_complement.substring(0, 500))}</div>
+            <div>${formatSequence(analysis.reverse_complement.substring(0, MAX_DISPLAY_LENGTH))}</div>
         </div>
     `;
     document.getElementById('sequence-details').innerHTML = sequenceHtml;
@@ -351,7 +354,7 @@ function displayDetailedAnalysis(data) {
     const translationHtml = `
         <div class="sequence-display">
             <h4>RNA Transcription:</h4>
-            <div>${formatSequence(analysis.rna.substring(0, 500))}</div>
+            <div>${formatSequence(analysis.rna.substring(0, MAX_DISPLAY_LENGTH))}</div>
             
             <h4 style="margin-top: 1rem;">Protein Translation:</h4>
             <div style="word-break: break-all;">${analysis.protein.substring(0, 200)}</div>
@@ -372,7 +375,7 @@ function formatSequence(sequence) {
 }
 
 // Switch analysis tabs
-function switchAnalysisTab(tab) {
+function switchAnalysisTab(tab, event) {
     // Update buttons
     document.querySelectorAll('.analysis-tab-btn').forEach(btn => {
         btn.classList.remove('active');
